@@ -39,8 +39,8 @@ export interface WeekStatus {
 }
 
 export interface AppUser {
+  id: string;
   email: string;
-  password: string;
   role: UserRole;
   restaurant?: Restaurant; // only for supervisors
   name: string;

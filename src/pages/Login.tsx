@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -11,20 +11,21 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { login } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
+  const { user, login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (user) navigate(user.role === "supervisor" ? "/supervisor" : "/admin", { replace: true });
+  }, [user, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    const success = login(email, password);
-    if (!success) {
-      setError("Invalid credentials");
-      return;
-    }
-    // Navigate based on role — auth context will have the user
-    const isAdmin = email === "contable@cadena.com";
-    navigate(isAdmin ? "/admin" : "/supervisor");
+    setSubmitting(true);
+    const err = await login(email, password);
+    if (err) setError("Invalid credentials");
+    setSubmitting(false);
   };
 
   return (
@@ -68,7 +69,9 @@ export default function Login() {
                 />
               </div>
               {error && <p className="text-sm text-destructive font-medium">{error}</p>}
-              <Button type="submit" className="w-full">Sign In</Button>
+              <Button type="submit" className="w-full" disabled={submitting}>
+                {submitting ? "Signing in…" : "Sign In"}
+              </Button>
             </form>
 
             <div className="mt-6 p-3 bg-muted rounded-lg">

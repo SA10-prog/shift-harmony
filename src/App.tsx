@@ -18,14 +18,16 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children, role }: { children: React.ReactNode; role: "supervisor" | "accountant" }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  if (loading) return null;
   if (!user) return <Navigate to="/" replace />;
   if (user.role !== role) return <Navigate to={user.role === "supervisor" ? "/supervisor" : "/admin"} replace />;
   return <>{children}</>;
 }
 
 function AppRoutes() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  if (loading) return null;
 
   return (
     <Routes>
